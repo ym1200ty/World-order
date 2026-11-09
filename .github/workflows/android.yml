@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      GODOT_VERSION: "4.7"
+      GODOT_VERSION: "3.5.3"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,12 +44,9 @@ jobs:
       - name: Import project and configure Godot for Android
         run: |
           godot --headless --path . --import || true
-          SETTINGS=$(find ~/.config/godot -name 'editor_settings*.tres' | head -1)
-          if [ -z "$SETTINGS" ]; then
-            mkdir -p ~/.config/godot
-            SETTINGS=~/.config/godot/editor_settings-4.tres
-            printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\n' > "$SETTINGS"
-          fi
+          mkdir -p ~/.config/godot
+          SETTINGS=~/.config/godot/editor_settings-4.tres
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\n' > "$SETTINGS"
           ANDROID_HOME=${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}
           cat >> "$SETTINGS" <<EOF
           export/android/java_sdk_path = "$JAVA_HOME"
@@ -58,6 +55,10 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
+
+      - name: Install Android Build Template
+        run: |
+          godot --headless --path . --install-android-build-template
 
       - name: Export APK
         run: |
