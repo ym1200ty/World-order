@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/share/godot/export_templates
-          key: godot-templates-4.7-official
+          key: godot-templates-4.7-official-v2
 
       - name: Install Godot and export templates
         run: |
@@ -32,10 +32,13 @@ jobs:
           unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
           sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.official
-          if [ ! -f ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.official/android_debug.apk ]; then
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          if [ ! -f ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_debug.apk ]; then
             wget -q $BASE/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
             unzip -q Godot_v${GODOT_VERSION}-stable_export_templates.tpz -d tpl
-            mv tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.official/
+            cp -r tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.official/
+            cp -r tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+            ls ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
           fi
 
       - name: Install Android SDK parts
@@ -64,6 +67,9 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
+          # الغي الـ Custom Build عشان يستخدم القالب الجاهز
+          sed -i 's/use_custom_build=true/use_custom_build=false/g' export_presets.cfg || true
+          sed -i 's/custom_build\/use_custom_build=true/custom_build\/use_custom_build=false/g' export_presets.cfg || true
 
       - name: Export APK
         run: |
