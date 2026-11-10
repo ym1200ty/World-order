@@ -53,6 +53,22 @@ jobs:
             -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
+      - name: Fix export_presets - disable custom build
+        run: |
+          cat export_presets.cfg
+          python3 -c "
+          import re
+          with open('export_presets.cfg','r') as f:
+              content = f.read()
+          # اقفل الـ Custom Build مهما كان شكله
+          content = re.sub(r'use_custom_build\s*=\s*true', 'use_custom_build = false', content)
+          content = re.sub(r'custom_build/use_custom_build\s*=\s*true', 'custom_build/use_custom_build = false', content)
+          with open('export_presets.cfg','w') as f:
+              f.write(content)
+          print('--- AFTER FIX ---')
+          print(content)
+          "
+
       - name: Import project and configure Godot for Android
         run: |
           godot --headless --path . --import || true
@@ -67,9 +83,6 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
-          # الغي الـ Custom Build عشان يستخدم القالب الجاهز
-          sed -i 's/use_custom_build=true/use_custom_build=false/g' export_presets.cfg || true
-          sed -i 's/custom_build\/use_custom_build=true/custom_build\/use_custom_build=false/g' export_presets.cfg || true
 
       - name: Export APK
         run: |
