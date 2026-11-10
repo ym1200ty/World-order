@@ -65,10 +65,6 @@ jobs:
           export/android/debug_keystore_pass = "android"
           EOF
 
-      - name: Install Android Build Template
-        run: |
-          godot --headless --path . --install-android-build-template
-
       - name: Export APK
         run: |
           mkdir -p build
